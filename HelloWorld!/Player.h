@@ -1,0 +1,38 @@
+#pragma once
+
+#include "Event.h"
+#include "StatTypes.h"
+
+struct Stats
+{
+	int Health = 100;
+	int MaxHealth = 100;
+	int Rizz = 100;
+	int MaxRizz = 100;
+	int Stamina = 100;
+	int MaxStamina = 100;
+	int Greed = 0;
+	int MaxGreed = 9999;
+};
+
+class Player
+{
+public:
+	Player();
+	~Player();
+	
+	int  GetStat(StatType stat) const;
+	bool IsDead() const;
+
+	void ChangeStat(StatType stat, int amount);
+
+	Event<> OnPlayerDied;
+	Event<StatType, int, int> OnStatChanged;
+
+private:
+	int& FieldForStat(StatType stat);
+	int  MaxForStat(StatType stat) const;
+
+	Stats stats;
+};
+
