@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include "ConsoleUI.h"
 #include "Story.h"
 #include "Game.h"
 
@@ -16,6 +17,17 @@ namespace
 
 		for (const auto& entry : scenes)
 		{
+			if (entry.second.options.empty())
+			{
+				std::cout << "Story error: scene " << entry.first << " has no options\n";
+				ok = false;
+			}
+			else if (entry.second.options.size() > 2)
+			{
+				std::cout << "Story error: scene " << entry.first << " has more than 2 options\n";
+				ok = false;
+			}
+
 			for (const Choice& option : entry.second.options)
 			{
 				if (option.nextSceneId != SCENE_END && scenes.count(option.nextSceneId) == 0)
@@ -29,17 +41,28 @@ namespace
 
 		return ok;
 	}
+
+	void PrintCentered(const std::string& text)
+	{
+		const std::size_t width = ConsoleUI::ContentWidth();
+		const std::size_t padding = text.size() < width ? (width - text.size()) / 2 : 0;
+		std::cout << std::string(padding, ' ') << text << "\n";
+	}
 }
 
 int main()
 {
-	std::cout << "============================================================\n";
-	std::cout << "                  H e l l o   W o r l d !\n";
-	std::cout << "============================================================\n";
-	std::cout << "        A tiny story about a program that wakes up.\n";
-	std::cout << "          Its life is shaped by the choices you make.\n\n";
-	std::cout << "       [options: 1 / 2]      [r] roll the dice\n\n";
-	std::cout << "============================================================\n";
+	ConsoleUI::ConfigureWindow();
+
+	ConsoleUI::WriteRule('=');
+	PrintCentered("H e l l o   W o r l d !");
+	ConsoleUI::WriteRule('=');
+	PrintCentered("A tiny story about a program that wakes up.");
+	PrintCentered("Its life is shaped by the choices you make.");
+	std::cout << "\n";
+	PrintCentered("Type the number of an option, or press [r] to roll the dice");
+	std::cout << "\n";
+	ConsoleUI::WriteRule('=');
 
 	std::map<int, Scene> scenes = BuildStory();
 	std::multimap<DiceRules, DiceInterlude> interludes = BuildInterludes();

@@ -124,6 +124,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleUI.cpp" />
     <ClCompile Include="Dice.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HelloWorld!.cpp" />
@@ -131,6 +132,7 @@
     <ClCompile Include="Story.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleUI.h" />
     <ClInclude Include="Dice.h" />
     <ClInclude Include="DiceInterlude.h" />
     <ClInclude Include="Event.h" />

@@ -18,7 +18,7 @@ struct Choice
 
 struct Scene
 {
-	int id;
+	int id = 0;
 	std::string text;
-	Choice options[2];
+	std::vector<Choice> options;
 };

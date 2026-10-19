@@ -3,6 +3,8 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <string>
+#include "ConsoleUI.h"
 #include "DiceInterlude.h"
 #include <random>
 
@@ -15,6 +17,8 @@ void Game::Play()
 		const Scene& scene = scenes[currentSceneId];
 		DisplayScene(scene);
 		int choice = ReadChoice(scene);
+		if (choice < 0)
+			return;  // input stream closed; leave quietly instead of looping
 		if (player.IsDead())
 			break;   // an interlude can kill the player mid-prompt
 		ApplyEffects(scene.options[choice].statEffects);
@@ -23,47 +27,57 @@ void Game::Play()
 
 	if (!player.IsDead())
 		std::cout << "\nThe End. Thanks for playing!!\n";
-
 }
 
 void Game::DisplayScene(const Scene& scene) const
 {
-	std::cout << "\n------------------------------------------------------------\n\n";
-	std::cout << scene.text << "\n\n";
-	std::cout << "------------------------------------------------------------\n\n";
+	std::cout << "\n";
+	ConsoleUI::WriteRule();
+	std::cout << "\n";
+	ConsoleUI::WriteWrapped(scene.text, "  ", "  ");
+	std::cout << "\n";
+	ConsoleUI::WriteRule();
+	std::cout << "\n";
 
-	std::cout << "  Stats: Health " << player.GetStat(StatType::Health)
-		<< " | Rizz " << player.GetStat(StatType::Rizz)
-		<< " | Stamina " << player.GetStat(StatType::Stamina)
-		<< " | Greed " << player.GetStat(StatType::Greed) << "\n\n";
+	const std::string stats = "Stats: Health " + std::to_string(player.GetStat(StatType::Health))
+		+ " | Rizz " + std::to_string(player.GetStat(StatType::Rizz))
+		+ " | Stamina " + std::to_string(player.GetStat(StatType::Stamina))
+		+ " | Greed " + std::to_string(player.GetStat(StatType::Greed));
+	ConsoleUI::WriteWrapped(stats, "  ", "  ");
+	std::cout << "\n";
 }
 
 int Game::ReadChoice(const Scene& scene)
 {
 	while (true)
 	{
-		for (std::size_t i = 0; i < 2; ++i)
+		for (std::size_t i = 0; i < scene.options.size(); ++i)
 		{
 			const Choice& opt = scene.options[i];
-			std::cout << "  [" << (i + 1) << "] " << opt.text;
+			std::string text = opt.text;
 
 			if (!IsSelectable(opt))
 			{
-				const auto& reqs = opt.requirements;
-				std::cout << "  (requires ";
-				for (std::size_t j = 0; j < reqs.size(); ++j)
+				text += "  (requires ";
+				for (std::size_t j = 0; j < opt.requirements.size(); ++j)
 				{
-					std::cout << NameOf(reqs[j].stat) << " " << reqs[j].minimum;
-					std::cout << (j + 1 == reqs.size() ? ")" : ", ");
+					text += NameOf(opt.requirements[j].stat);
+					text += " ";
+					text += std::to_string(opt.requirements[j].minimum);
+					text += (j + 1 == opt.requirements.size()) ? ")" : ", ";
 				}
 			}
-			std::cout << "\n";
+
+			const std::string prefix = "  [" + std::to_string(i + 1) + "] ";
+			ConsoleUI::WriteWrapped(text, prefix, std::string(prefix.size(), ' '));
 		}
+
 		std::cout << "  [r] Roll the dice (" << Dice::DICE_STAMINA_COST << " stamina)\n";
-		
 		std::cout << "\nInput: ";
+
 		std::string input;
-		std::getline(std::cin, input);
+		if (!std::getline(std::cin, input))
+			return -1;
 
 		if (input == "r" || input == "R")
 		{
@@ -72,16 +86,21 @@ int Game::ReadChoice(const Scene& scene)
 			continue; // re-prompt same scene
 		}
 
-		if (input == "1" && IsSelectable(scene.options[0])) return 0;
-		if (input == "2" && IsSelectable(scene.options[1])) return 1;
-		std::cout << "You can't do that.\n";
+		if (input.size() == 1 && input[0] >= '1' && input[0] <= '9')
+		{
+			const std::size_t index = static_cast<std::size_t>(input[0] - '1');
+			if (index < scene.options.size() && IsSelectable(scene.options[index]))
+				return static_cast<int>(index);
+		}
+
+		std::cout << "You can't do that.\n\n";
 	}
 }
 
 bool Game::IsSelectable(const Choice& choice) const
 {
 	bool requirementsFulfilled = true;
-	for (auto& requirement : choice.requirements)
+	for (const auto& requirement : choice.requirements)
 	{
 		if (player.GetStat(requirement.stat) < requirement.minimum) requirementsFulfilled = false;
 	}
@@ -129,7 +148,7 @@ void Game::TryDiceInterlude()
 	int selection = distribution(generator);
 
 	std::cout << "Dice event: " << matchingInterludes[selection].name << "!\n\n";
-	std::cout << matchingInterludes[selection].text << "\n";
+	ConsoleUI::WriteWrapped(matchingInterludes[selection].text, "  ", "  ");
 	ApplyEffects(matchingInterludes[selection].effects);
 	std::cout << "\n";
 }

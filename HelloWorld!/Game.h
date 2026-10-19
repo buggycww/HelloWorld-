@@ -2,6 +2,7 @@
 
 #include <map>
 #include <iostream>
+#include "ConsoleUI.h"
 #include "Scene.h"
 #include "DiceInterlude.h"
 #include "Player.h"
@@ -15,7 +16,9 @@ public:
 		subs.push_back(player.OnPlayerDied.Subscribe(
 			[]()
 			{
-				std::cout << "\nYou died. It's alright. The user starts another window... You were replacable anyway.\n";
+				std::cout << "\n";
+				ConsoleUI::WriteWrapped("You died. It's alright. The user starts another window... You were replaceable anyway.",
+					"  ", "  ");
 			}));
 
 		subs.push_back(player.OnStatChanged.Subscribe(
@@ -30,7 +33,7 @@ public:
 
 private:
 	void DisplayScene(const Scene& scene) const;
-	int ReadChoice(const Scene& scene);
+	int ReadChoice(const Scene& scene);   // returns -1 when input closes
 	bool IsSelectable(const Choice& choice) const;
 	void TryDiceInterlude();
 	void ApplyEffects(const std::vector<StatEffect>& effects);
