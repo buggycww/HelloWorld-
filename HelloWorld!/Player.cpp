@@ -20,10 +20,14 @@ int& Player::FieldForStat(StatType stat)
 {
 	switch (stat)
 	{
-	case StatType::Health:  return stats.Health;
-	case StatType::Rizz:    return stats.Rizz;
-	case StatType::Stamina: return stats.Stamina;
-	case StatType::Greed:   return stats.Greed;
+	case StatType::Health:  
+		return stats.Health;
+	case StatType::Rizz:    
+		return stats.Rizz;
+	case StatType::Stamina: 
+		return stats.Stamina;
+	case StatType::Greed:   
+		return stats.Greed;
 	}
 	return stats.Health;
 }
@@ -32,10 +36,14 @@ int Player::MaxForStat(StatType stat) const
 {
 	switch (stat)
 	{
-	case StatType::Health:  return stats.MaxHealth;
-	case StatType::Rizz:    return stats.MaxRizz;
-	case StatType::Stamina: return stats.MaxStamina;
-	case StatType::Greed:   return stats.MaxGreed;
+	case StatType::Health:  
+		return stats.MaxHealth;
+	case StatType::Rizz:    
+		return stats.MaxRizz;
+	case StatType::Stamina: 
+		return stats.MaxStamina;
+	case StatType::Greed:   
+		return stats.MaxGreed;
 	}
 	return 0;
 }

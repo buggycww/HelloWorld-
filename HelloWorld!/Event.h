@@ -33,6 +33,9 @@ public:
 	}
 
 private:
+	template <typename... Args> friend class Event;
+	explicit Subscription(std::function<void()>&& kill) : kill_(std::move(kill)) {}
+
 	std::function<void()> kill_;
 };
 
@@ -41,7 +44,6 @@ class Event
 {
 public:
 	using Callback = std::function<void(Args...)>;
-	using ID = std::size_t;
 
 	Event() = default;
 	// copying a publisher would duplicate its subscribers; moving is fine

@@ -125,14 +125,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Dice.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="HelloWorld!.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Story.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dice.h" />
     <ClInclude Include="Event.h" />
-    <ClInclude Include="IDiceEvent.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="StatTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

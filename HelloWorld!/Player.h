@@ -18,8 +18,7 @@ struct Stats
 class Player
 {
 public:
-	Player();
-	~Player();
+	Player() = default;
 	
 	int  GetStat(StatType stat) const;
 	bool IsDead() const;
