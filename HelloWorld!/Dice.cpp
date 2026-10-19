@@ -7,7 +7,7 @@ std::tuple<int, std::vector<DiceRules>> Dice::RollDice()
 
     std::random_device rd;
     std::mt19937 generator(rd());
-    std::uniform_int_distribution<int> distribution(1, 6);
+    std::uniform_int_distribution<int> distribution(1, numFaces);
     int roll = distribution(generator);
 
     if (Dice::GetFaceRule(roll) != DiceRules::None) rules.push_back(Dice::GetFaceRule(roll));

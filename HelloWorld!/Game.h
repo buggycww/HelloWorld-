@@ -1,14 +1,16 @@
 #pragma once
 
 #include <map>
+#include <iostream>
 #include "Scene.h"
+#include "DiceInterlude.h"
 #include "Player.h"
 
 class Game
 {
 public:
 	Game(std::map<int, Scene> scenes, std::multimap<DiceRules, DiceInterlude> interludeMap) :
-		scenes(scenes), interludeMap(interludeMap)
+		scenes(std::move(scenes)), interludeMap(std::move(interludeMap))
 	{
 		subs.push_back(player.OnPlayerDied.Subscribe(
 			[]()

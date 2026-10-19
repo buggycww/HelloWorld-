@@ -1,6 +1,8 @@
 #include "Game.h"
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <thread>
 #include "DiceInterlude.h"
 #include <random>
 
@@ -13,17 +15,27 @@ void Game::Play()
 		const Scene& scene = scenes[currentSceneId];
 		DisplayScene(scene);
 		int choice = ReadChoice(scene);
+		if (player.IsDead())
+			break;   // an interlude can kill the player mid-prompt
 		ApplyEffects(scene.options[choice].statEffects);
 		currentSceneId = scene.options[choice].nextSceneId;
 	}
 
 	if (!player.IsDead())
 		std::cout << "\nThe End. Thanks for playing!!\n";
-		
+
 }
 
 void Game::DisplayScene(const Scene& scene) const
 {
+	std::cout << "\n------------------------------------------------------------\n\n";
+	std::cout << scene.text << "\n\n";
+	std::cout << "------------------------------------------------------------\n\n";
+
+	std::cout << "  Stats: Health " << player.GetStat(StatType::Health)
+		<< " | Rizz " << player.GetStat(StatType::Rizz)
+		<< " | Stamina " << player.GetStat(StatType::Stamina)
+		<< " | Greed " << player.GetStat(StatType::Greed) << "\n\n";
 }
 
 int Game::ReadChoice(const Scene& scene)
@@ -48,11 +60,18 @@ int Game::ReadChoice(const Scene& scene)
 			std::cout << "\n";
 		}
 		std::cout << "  [r] Roll the dice (" << Dice::DICE_STAMINA_COST << " stamina)\n";
-
+		
+		std::cout << "\nInput: ";
 		std::string input;
 		std::getline(std::cin, input);
 
-		if (input == "r" || input == "R") { TryDiceInterlude(); continue; } // re-prompt same scene
+		if (input == "r" || input == "R")
+		{
+			TryDiceInterlude();
+			if (player.IsDead()) return 0; // exit immediately if player dead
+			continue; // re-prompt same scene
+		}
+
 		if (input == "1" && IsSelectable(scene.options[0])) return 0;
 		if (input == "2" && IsSelectable(scene.options[1])) return 1;
 		std::cout << "You can't do that.\n";
@@ -81,9 +100,14 @@ void Game::TryDiceInterlude()
 	auto [roll, rules] = Dice::RollDice();
 
 	player.ChangeStat(StatType::Stamina, -Dice::DICE_STAMINA_COST);
-	// should add short delay after ever roll...
-	std::cout << "Dice Rolled...\n" << "It rolls...\n" << "Still rolling...\n";
-	std::cout << "It lands on " << roll << "!\n";
+
+	std::cout << "\nDice Rolled...\n";
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::cout << "It rolls...\n";
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::cout << "Still rolling...\n";
+	std::this_thread::sleep_for(std::chrono::milliseconds(700));
+	std::cout << "\nIt lands on " << roll << "!\n\n";
 
 	std::vector<DiceInterlude> matchingInterludes = {};
 	for (DiceRules rule : rules)
@@ -101,19 +125,17 @@ void Game::TryDiceInterlude()
 
 	std::random_device rd;
 	std::mt19937 generator(rd());
-	std::uniform_int_distribution<int> distribution(0, matchingInterludes.size() - 1);
+	std::uniform_int_distribution<int> distribution(0, static_cast<int>(matchingInterludes.size()) - 1);
 	int selection = distribution(generator);
 
-	std::cout << "Dice event: " << matchingInterludes[selection].name << "!\n";
+	std::cout << "Dice event: " << matchingInterludes[selection].name << "!\n\n";
 	std::cout << matchingInterludes[selection].text << "\n";
 	ApplyEffects(matchingInterludes[selection].effects);
+	std::cout << "\n";
 }
 
 void Game::ApplyEffects(const std::vector<StatEffect>& effects)
 {
 	for (const StatEffect& effect : effects)
-	{
 		player.ChangeStat(effect.stat, effect.amount);
-		std::cout << "Player " << NameOf(effect.stat) << " " << effect.amount << "!\n";
-	}
 }

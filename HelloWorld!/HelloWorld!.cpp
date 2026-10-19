@@ -2,20 +2,65 @@
 //
 
 #include <iostream>
+#include <map>
+#include <string>
+#include "Story.h"
+#include "Game.h"
+
+namespace
+{
+	// validate story
+	bool StoryIsValid(const std::map<int, Scene>& scenes)
+	{
+		bool ok = true;
+
+		for (const auto& entry : scenes)
+		{
+			for (const Choice& option : entry.second.options)
+			{
+				if (option.nextSceneId != SCENE_END && scenes.count(option.nextSceneId) == 0)
+				{
+					std::cout << "Story error: scene " << entry.first
+						<< " points to missing scene " << option.nextSceneId << "\n";
+					ok = false;
+				}
+			}
+		}
+
+		return ok;
+	}
+}
 
 int main()
 {
-    std::cout << "Hello World!\n";
-    return 0;
+	std::cout << "============================================================\n";
+	std::cout << "                  H e l l o   W o r l d !\n";
+	std::cout << "============================================================\n";
+	std::cout << "        A tiny story about a program that wakes up.\n";
+	std::cout << "          Its life is shaped by the choices you make.\n\n";
+	std::cout << "       [options: 1 / 2]      [r] roll the dice\n\n";
+	std::cout << "============================================================\n";
+
+	std::map<int, Scene> scenes = BuildStory();
+	std::multimap<DiceRules, DiceInterlude> interludes = BuildInterludes();
+
+	if (!StoryIsValid(scenes))
+	{
+		std::cout << "The story is broken. Fix the scenes listed above before playing.\n";
+		return 1;
+	}
+
+	std::cout << "\nPress Enter to begin your story...";
+	std::string start;
+	if (!std::getline(std::cin, start))
+		return 0;
+
+	Game game(std::move(scenes), std::move(interludes));
+	game.Play();
+
+	std::cout << "\nPress Enter to close the window...";
+	std::string wait;
+	std::getline(std::cin, wait);
+
+	return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

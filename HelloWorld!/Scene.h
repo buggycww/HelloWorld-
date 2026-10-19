@@ -1,8 +1,8 @@
 #pragma once
 
-#include "StatTypes.h"
+#include <string>
 #include <vector>
-#include "Dice.h"
+#include "StatTypes.h"
 
 constexpr int SCENE_END = -1;
 constexpr int SCENE_START = 1;
@@ -21,12 +21,4 @@ struct Scene
 	int id;
 	std::string text;
 	Choice options[2];
-};
-
-struct DiceInterlude
-{
-	std::string name;
-	std::vector<DiceRules> triggers;
-	std::string text;
-	std::vector<StatEffect> effects;
 };

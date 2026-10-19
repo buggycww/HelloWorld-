@@ -76,7 +76,8 @@ public:
 
 		slots_.erase(
 			std::remove_if(slots_.begin(), slots_.end(),
-				[](const std::shared_ptr<Slot>& s) { return !s->alive; }));
+				[](const std::shared_ptr<Slot>& s) { return !s->alive; }),
+			slots_.end());
 	}
 
 private:

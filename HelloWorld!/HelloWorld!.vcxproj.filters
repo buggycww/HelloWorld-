@@ -50,5 +50,11 @@
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DiceInterlude.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Story.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
