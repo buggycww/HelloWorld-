@@ -12,13 +12,13 @@ public:
 	Subscription() = default;
 	~Subscription() { Reset(); }
 
-	Subscription(Subscription&& other) noexcept : kill_(std::move(other.kill_)) {}
+	Subscription(Subscription&& other) noexcept : kill(std::move(other.kill)) {}
 	Subscription& operator=(Subscription&& other) noexcept
 	{
 		if (this != &other)
 		{
 			Reset();
-			kill_ = std::move(other.kill_);
+			kill = std::move(other.kill);
 		}
 
 		return *this;
@@ -26,17 +26,17 @@ public:
 
 	void Reset()
 	{
-		if (kill_) 
+		if (kill) 
 		{ 
-			kill_();  kill_ = nullptr; 
+			kill();  kill = nullptr; 
 		}
 	}
 
 private:
 	template <typename... Args> friend class Event;
-	explicit Subscription(std::function<void()>&& kill) : kill_(std::move(kill)) {}
+	explicit Subscription(std::function<void()>&& kill) : kill(std::move(kill)) {}
 
-	std::function<void()> kill_;
+	std::function<void()> kill;
 };
 
 template <typename... Args>
@@ -56,7 +56,7 @@ public:
 	[[nodiscard]] Subscription Subscribe(Callback callback)
 	{
 		auto slot = std::make_shared<Slot>(std::move(callback));
-		slots_.push_back(slot);
+		slots.push_back(slot);
 
 		std::weak_ptr<Slot> weakSlot = slot;
 
@@ -69,15 +69,15 @@ public:
 	{
 		// iterate over a snapshot. callbacks may subscribe, unsubscribe, or destroy
 		// other subscribers while mid-dispatch
-		const std::vector<std::shared_ptr<Slot>> snapshot = slots_;
+		const std::vector<std::shared_ptr<Slot>> snapshot = slots;
 		
 		for (const auto& slot : snapshot)
 			if (slot->alive) slot->callback(args...);
 
-		slots_.erase(
-			std::remove_if(slots_.begin(), slots_.end(),
+		slots.erase(
+			std::remove_if(slots.begin(), slots.end(),
 				[](const std::shared_ptr<Slot>& s) { return !s->alive; }),
-			slots_.end());
+			slots.end());
 	}
 
 private:
@@ -88,6 +88,6 @@ private:
 		bool alive = true;
 	};
 
-	std::vector<std::shared_ptr<Slot>> slots_;
+	std::vector<std::shared_ptr<Slot>> slots;
 };
 
